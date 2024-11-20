@@ -1,9 +1,21 @@
 import { Request, Response } from "express";
 import { StudentServices } from "./student.services";
+import studentValidationSchema from "./student.validation";
 
 const createStudent = async (req: Request, res: Response) => {
   try {
-    const student = req.body.students;
+    
+
+    const { students: student } = req.body;
+    const {error} = studentValidationSchema.validate(student);
+
+    if (error) {
+      return res.status(400).json({
+        status: "error",
+        message: "Validation failed",
+        error: error.details,
+      });
+    }
     // will coll service function to send this data
     const result = await StudentServices.createStudentIntoDB(student);
     // send response
@@ -39,7 +51,6 @@ const getStudents = async (req: Request, res: Response) => {
 };
 
 const getSingleStudent = async (req: Request, res: Response) => {
-
   try {
     const student = await StudentServices.getStudentSingleFromDB(
       req.params.studentId
@@ -61,5 +72,5 @@ const getSingleStudent = async (req: Request, res: Response) => {
 export const StudentController = {
   createStudent,
   getStudents,
-  getSingleStudent
+  getSingleStudent,
 };

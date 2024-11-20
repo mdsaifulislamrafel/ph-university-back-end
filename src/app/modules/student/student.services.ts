@@ -12,7 +12,6 @@ const getStudentFromDB = async() => {
 };
 
 const getStudentSingleFromDB = async(id: string) => {
-
     const res = await StudentModel.findOne({id});
     return res;
 };
