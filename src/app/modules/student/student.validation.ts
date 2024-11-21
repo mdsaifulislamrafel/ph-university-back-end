@@ -50,6 +50,8 @@ const studentSchema = z.object({
   gender: z.enum(["male", "female", "other"], {
     errorMap: () => ({ message: "Gender is required and must be valid." }),
   }),
+  password: z.string().nonempty("Password is required."),
+  
   dateOfBirth: z.string().optional(),
   email: z
     .string()
@@ -83,6 +85,7 @@ const studentSchema = z.object({
       errorMap: () => ({ message: "Status must be either 'active' or 'inactive'." }),
     })
     .default("active"),
+    isDeleted: z.boolean()
 });
 
 export default studentSchema;

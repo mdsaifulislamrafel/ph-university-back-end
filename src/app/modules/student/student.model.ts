@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-this-alias */
 import { model, Schema } from "mongoose";
 import {
   TGuardian,
@@ -7,6 +8,8 @@ import {
   TUserName,
 } from "./student.interface";
 import validator from "validator";
+import bcrypt from "bcrypt";
+import config from "../../config";
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -93,6 +96,11 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     type: userNameSchema,
     required: [true, "Student's Name is required."],
   },
+  password: {
+    type: String,
+    required: [true, "Password is required."],
+    unique: true,
+  },
   gender: {
     type: String,
     enum: {
@@ -163,15 +171,52 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     },
     default: "active",
   },
+  isDeleted: { type: Boolean, default: false },
 });
 
-// creating a custom Statics method start
+// pre save middleware / hooks for mongoose start
+studentSchema.pre("save", async function (next) {
+  // hashing password and save into database
+  const user = this;
+  user.password = await bcrypt.hash(
+    user.password,
+    Number(config.bcrypt_salt_rounds)
+  );
+  next();
+});
+// pre save middleware / hooks for mongoose end
 
+// post save middleware / hooks for mongoose start
+studentSchema.post("save", async function (doc, next) {
+  doc.password = "";
+  next();
+});
+// post save middleware / hooks for mongoose end
+
+// Query middleware / hooks for mongoose start
+
+studentSchema.pre("find", function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre("findOne", function (next) {
+  this.findOne({ isDeleted: { $ne: true } });
+  next();
+});
+
+studentSchema.pre("aggregate", function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
+// Query middleware / hooks for mongoose end
+
+// creating a custom Statics method start
 studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await Student.findOne({ id });
   return existingUser;
 };
-
 // creating a custom instance method end
 
 // creating a custom instance method start

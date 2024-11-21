@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Model } from "mongoose";
 
 export type TUserName = {
@@ -26,6 +27,7 @@ export type TLocalGuardian = {
 export type TStudent = {
   id: string;
   name: TUserName;
+  password: string;
   gender: "male" | "female" | "other";
   dateOfBirth?: string;
   email: string;
@@ -50,6 +52,7 @@ export type TStudent = {
   localGuardian: TLocalGuardian;
   profileImg?: string;
   isActive: "active" | "inactive";
+  isDeleted: boolean;
 };
 
 // creating a custom Statics method start
