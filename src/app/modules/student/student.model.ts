@@ -172,7 +172,19 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     default: "active",
   },
   isDeleted: { type: Boolean, default: false },
+}, {
+  toJSON: {
+    virtuals: true,
+  }
 });
+
+// virtual properties drive by mongoose start
+
+studentSchema.virtual("fullName").get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+});
+
+// virtual properties drive by mongoose end
 
 // pre save middleware / hooks for mongoose start
 studentSchema.pre("save", async function (next) {
