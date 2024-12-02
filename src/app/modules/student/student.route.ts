@@ -5,7 +5,6 @@ const router = express.Router();
 
 
 // will coll controller functions
-router.post('/create-user', StudentController.createStudent)
 
 router.get('/get-users', StudentController.getStudents)
 

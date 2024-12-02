@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
 import { model, Schema } from "mongoose";
 import {
   TGuardian,
@@ -8,8 +7,7 @@ import {
   TUserName,
 } from "./student.interface";
 import validator from "validator";
-import bcrypt from "bcrypt";
-import config from "../../config";
+
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -92,14 +90,15 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     required: [true, "Student ID is required."],
     unique: true,
   },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'user',
+    required: [true, 'User id is required'],
+    unique: true
+  },
   name: {
     type: userNameSchema,
     required: [true, "Student's Name is required."],
-  },
-  password: {
-    type: String,
-    required: [true, "Password is required."],
-    unique: true,
   },
   gender: {
     type: String,
@@ -163,14 +162,6 @@ const studentSchema = new Schema<TStudent, StudentModel>({
     required: [true, "Local Guardian information is required."],
   },
   profileImg: { type: String },
-  isActive: {
-    type: String,
-    enum: {
-      values: ["active", "inactive"],
-      message: "{VALUE} is not a valid status.",
-    },
-    default: "active",
-  },
   isDeleted: { type: Boolean, default: false },
 }, {
   toJSON: {
@@ -185,25 +176,6 @@ studentSchema.virtual("fullName").get(function () {
 });
 
 // virtual properties drive by mongoose end
-
-// pre save middleware / hooks for mongoose start
-studentSchema.pre("save", async function (next) {
-  // hashing password and save into database
-  const user = this;
-  user.password = await bcrypt.hash(
-    user.password,
-    Number(config.bcrypt_salt_rounds)
-  );
-  next();
-});
-// pre save middleware / hooks for mongoose end
-
-// post save middleware / hooks for mongoose start
-studentSchema.post("save", async function (doc, next) {
-  doc.password = "";
-  next();
-});
-// post save middleware / hooks for mongoose end
 
 // Query middleware / hooks for mongoose start
 
@@ -231,13 +203,5 @@ studentSchema.statics.isUserExists = async function (id: string) {
 };
 // creating a custom instance method end
 
-// creating a custom instance method start
-
-// studentSchema.methods.isUserExists = async function (id: string) {
-//   const existingUser = await Student.findOne({ id });
-//   return existingUser;
-// };
-
-// creating a custom instance method end
 
 export const Student = model<TStudent, StudentModel>("Student", studentSchema);
