@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // UserName Schema
-const userNameSchema = z.object({
+const userNameValidationSchema = z.object({
   firstName: z
     .string()
     .min(3, "First Name should have at least 3 characters.")
@@ -26,7 +26,7 @@ const userNameSchema = z.object({
 });
 
 // Guardian Schema
-const guardianSchema = z.object({
+const guardianValidationSchema = z.object({
   fatherName: z.string().nonempty("Father's Name is required."),
   fatherOccupation: z.string().nonempty("Father's Occupation is required."),
   fatherContactNo: z.string().nonempty("Father's Contact Number is required."),
@@ -36,56 +36,57 @@ const guardianSchema = z.object({
 });
 
 // Local Guardian Schema
-const localGuardianSchema = z.object({
+const localGuardianValidationSchema = z.object({
   name: z.string().nonempty("Local Guardian's Name is required."),
   occupation: z.string().nonempty("Local Guardian's Occupation is required."),
-  contactNo: z.string().nonempty("Local Guardian's Contact Number is required."),
+  contactNo: z
+    .string()
+    .nonempty("Local Guardian's Contact Number is required."),
   address: z.string().nonempty("Local Guardian's Address is required."),
 });
 
 // Main Student Schema
-const studentSchema = z.object({
-  id: z.string().nonempty("Student ID is required."),
-  name: userNameSchema,
-  gender: z.enum(["male", "female", "other"], {
-    errorMap: () => ({ message: "Gender is required and must be valid." }),
-  }),
-  password: z.string().nonempty("Password is required."),
+const createStudentValidationSchema = z.object({
+  body: z.object({
+    password: z.string().nonempty("Password is required."),
+    student: z.object({
+    name: userNameValidationSchema,
+    gender: z.enum(["male", "female", "other"], {
+      errorMap: () => ({ message: "Gender is required and must be valid." }),
+    }),
   
-  dateOfBirth: z.string().optional(),
-  email: z
-    .string()
-    .email("Invalid email address.")
-    .nonempty("Email Address is required."),
-  contactNo: z.string().nonempty("Contact Number is required."),
-  emergencyNo: z.string().nonempty("Emergency Contact Number is required."),
-  bloodGroup: z
-    .enum([
-      "A",
-      "B",
-      "AB",
-      "O",
-      "A+",
-      "B+",
-      "AB+",
-      "O+",
-      "A-",
-      "B-",
-      "AB-",
-      "O-",
-    ])
-    .optional(),
-  presentAddress: z.string().nonempty("Present Address is required."),
-  permanentAddress: z.string().nonempty("Permanent Address is required."),
-  guardian: guardianSchema,
-  localGuardian: localGuardianSchema,
-  profileImg: z.string().optional(),
-  isActive: z
-    .enum(["active", "inactive"], {
-      errorMap: () => ({ message: "Status must be either 'active' or 'inactive'." }),
+    dateOfBirth: z.string().optional(),
+    email: z
+      .string()
+      .email("Invalid email address.")
+      .nonempty("Email Address is required."),
+    contactNo: z.string().nonempty("Contact Number is required."),
+    emergencyNo: z.string().nonempty("Emergency Contact Number is required."),
+    bloodGroup: z
+      .enum([
+        "A",
+        "B",
+        "AB",
+        "O",
+        "A+",
+        "B+",
+        "AB+",
+        "O+",
+        "A-",
+        "B-",
+        "AB-",
+        "O-",
+      ])
+      .optional(),
+    presentAddress: z.string().nonempty("Present Address is required."),
+    permanentAddress: z.string().nonempty("Permanent Address is required."),
+    guardian: guardianValidationSchema,
+    localGuardian: localGuardianValidationSchema,
+    profileImg: z.string().optional(),
     })
-    .default("active"),
-    isDeleted: z.boolean()
+  })
 });
 
-export default studentSchema;
+export const studentValidations = {
+  createStudentValidationSchema,
+};
