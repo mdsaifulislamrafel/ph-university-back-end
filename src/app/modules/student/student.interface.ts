@@ -54,6 +54,7 @@ export type TStudent = {
   profileImg?: string;
   admissionSemester: Types.ObjectId;
   isDeleted: boolean;
+  academicDepartment: Types.ObjectId;
 };
 
 // creating a custom Statics method start
