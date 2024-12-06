@@ -203,6 +203,6 @@ studentSchema.statics.isUserExists = async function (id: string) {
   return existingUser;
 };
 // creating a custom instance method end
-
+// studentSchema.index({ email: 1 }, { unique: true });
 
 export const Student = model<TStudent, StudentModel>("Student", studentSchema);
