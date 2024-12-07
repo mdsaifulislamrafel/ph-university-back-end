@@ -4,7 +4,12 @@ import { Student } from "./student.model";
 
 
 const getStudentFromDB = async () => {
-  const res = await Student.find({}).populate('academicDepartment').populate('admissionSemester').populate('user');
+  const res = await Student.find({}).populate('admissionSemester').populate({
+    path: 'academicDepartment',
+    populate: {
+      path: 'academicFaculty',
+    }
+  }).populate('user');
   return res;
 };
 
