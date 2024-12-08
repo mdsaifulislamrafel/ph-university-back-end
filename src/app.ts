@@ -14,9 +14,11 @@ app.use(cors());
 // application routes
 app.use("/api/v1", router);
 
-app.get("/", (req: Request, res: Response) => {
+const test = async (req: Request, res: Response) => {
     res.send("Welcome to typescript");
-});
+}
+
+app.get("/", test);
 
 // global error handler
 app.use(globalErrorHandler as any);
@@ -25,3 +27,5 @@ app.use(globalErrorHandler as any);
 app.use(notFound as any);
 
 export default app;
+
+

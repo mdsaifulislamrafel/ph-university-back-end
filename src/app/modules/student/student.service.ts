@@ -5,8 +5,16 @@ import httpStatus from "http-status";
 import { User } from "../user/user.model";
 import { TStudent } from "./student.interface";
 
-const getStudentFromDB = async () => {
-  const res = await Student.find({})
+const getStudentFromDB = async (query: Record<string, unknown>) => {
+  let searchTram = "";
+  if (query?.searchTram) {
+    searchTram = query?.searchTram as string;
+  }
+  const res = await Student.find({
+    $or: ["email", "name.first", "presentAddress"].map((field) => ({
+      [field]: {$regex: searchTram, $options: 'i'}
+    })),
+  })
     .populate("admissionSemester")
     .populate({
       path: "academicDepartment",
@@ -24,32 +32,38 @@ const getStudentSingleFromDB = async (id: string) => {
   return res;
 };
 
-const getUpdateStudentFromDB = async (id: string, payload: Partial<TStudent>) => {
+const getUpdateStudentFromDB = async (
+  id: string,
+  payload: Partial<TStudent>
+) => {
+  const { name, guardian, localGuardian, ...remainingStudentData } = payload;
 
-  const {name, guardian, localGuardian, ...remainingStudentData} = payload;
+  const modifiedUpdateData: Record<string, unknown> = {
+    ...remainingStudentData,
+  };
 
-  const modifiedUpdateData : Record<string, unknown> = {...remainingStudentData};
-
-  if(name && Object.keys(name).length) {
-    for(const [key, value] of Object.entries(name)){
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
       modifiedUpdateData[`name.${key}`] = value;
     }
   }
-  
-  if(guardian && Object.keys(guardian).length) {
-    for(const [key, value] of Object.entries(guardian)){
+
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
       modifiedUpdateData[`guardian.${key}`] = value;
     }
   }
 
-  if(localGuardian && Object.keys(localGuardian).length) {
-    for(const [key, value] of Object.entries(localGuardian)) {
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
       modifiedUpdateData[`localGuardian.${key}`] = value;
     }
   }
 
-
-  const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, {new: true, runValidators: true});
+  const result = await Student.findOneAndUpdate({ id }, modifiedUpdateData, {
+    new: true,
+    runValidators: true,
+  });
   return result;
 };
 
